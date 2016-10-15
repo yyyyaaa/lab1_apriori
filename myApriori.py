@@ -1,4 +1,6 @@
-import collections
+from collections import Counter, defaultdict
+from candidateGen import *
+import pdb
 
 def getTransaction(inputfile):
     transaction_set = []
@@ -14,52 +16,39 @@ def getTransaction(inputfile):
         return []
 
 def Apriori(transaction_set, minsupport):
-    init_set = collections.defaultdict(lambda: 0)
+    init_set = defaultdict(int)
+    transaction_count = 0
 
     # create init itemsets
     for transaction in transaction_set:
         for item in transaction:
             init_set[item] = init_set[item] + 1
-
+            transaction_count += 1
 
     #find first frequent set
-    transaction_len = len(transaction_set)
     first_set = {item: frequency for (item, frequency) in init_set.iteritems()
-               if float(init_set[item]) / transaction_len >= minsupport}
+               if float(init_set[item]) / transaction_count >= minsupport}
     freqset = []
     freqset.append(first_set)
+    candidate_dict = Counter()
+
 
     while len(freqset[-1]) != 0:
-        pass
+        current_candidate = candidateGen([list(x) for x in freqset[-1].keys()])
+        pdb.set_trace()
+        for transaction in transaction_set:
 
-    return init_set
+            for candidate_item in current_candidate:
+                if candidate_item in transaction:
+                    candidate_dict[tuple(candidate_item)] += 1
 
-def candidateGen(freqset):
-    # Set of new candidate
-    candidate_set = []
+        new_freqset = { item: freq for item, freq in candidate_dict.iteritems()
+                        if float(freq)/transaction_len >= minsupport }
 
-    # Join step
-    keylist = freqset.keys()
-    for i in range(len(keylist) - 1):
-        for j in range(i + 1, len(freqset)):
-            item1 = freqset[i]
-            item2 = freqset[j]
-            if cmp(item1[:-1], item2[:-2]) == 0 and item1[-1] != item2[-1]:
-                newset = item1
+        freqset.append(new_freqset)
 
-#transaction = getTransaction('retail.dat')
-#print len(Apriori(transaction, 0.0001))
+    return freqset
 
-
-set = {i:i + 1 for i in range(1, 11)}
-setb = {a: b for a, b in set.iteritems()
-        if set[a] >= 8}
-setc = []
-setc.append(set)
-setc.append({})
-if not setc[-1]:
-    print 'fsdfsd'
-print setc
-
-key = set.keys()
-print key
+if __name__ == "__main__":
+    transaction = getTransaction('retail.dat')
+    print len(Apriori(transaction, 0.0001))

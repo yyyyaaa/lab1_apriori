@@ -1,15 +1,20 @@
 import sys
 import os
 import itertools
+from collections import defaultdict
 import pdb
 
-def candidateGen(inputfile):
+def candidateGen(freqset):
+    '''
+    params:
+        *freqset: dict
+    '''
+
     # Set of new candidate
+    print "type: " + str(type(freqset))
     candidate_set = []
 
-    # Get frequent itemsets from inputfile
-    freqset = getFreqSet(inputfile)
-    if freqset == []:
+    if not freqset:
         return []
 
     # Join step
@@ -52,19 +57,22 @@ def writeCandidate():
         print "Input file not found"
         return
 
+    # Get frequent itemsets from inputfile
+    freqset = getFreqSet(inputfile)
+
     # Generate candidate
-    candidate_set = candidateGen(inputfile)
+    candidate_set = candidateGen(freqset)
 
     # Write output
     try:
         with open(outputfile, "wt") as file:
-            for candidate in candidate_set:
-                for item in candidate:
-                    file.write(item + ' ')
-                file.write('\n')
+            for key in candidate_set:
+                line = ' '.join(key)
+                file.write(line)
         file.close()
     except:
         print "Cannot write file"
         return
 
-writeCandidate()
+if __name__ == "__main__":
+    writeCandidate()
