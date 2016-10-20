@@ -7,14 +7,16 @@ import pdb
 def candidateGen(freqset):
     '''
     params:
-        *freqset: dict
+        *freqset: list of list
     '''
 
     # Set of new candidate
-    print "type: " + str(type(freqset))
     candidate_set = []
 
     if not freqset:
+        return []
+
+    if len(freqset) == 1:
         return []
 
     # Join step
@@ -68,7 +70,7 @@ def writeCandidate():
         with open(outputfile, "wt") as file:
             for key in candidate_set:
                 line = ' '.join(key)
-                file.write(line)
+                file.write(line + '\n')
         file.close()
     except:
         print "Cannot write file"
