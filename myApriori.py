@@ -1,118 +1,83 @@
 from collections import Counter, defaultdict
+from candidateGen import candidateGen
+import sys
 import os
-from candidateGen import *
-import pdb
+class myApriori():
+	def __init__(self):
+		self.item = defaultdict(list)
+		self.total = 0.0
+		self.f = []
+		self.f_sup = defaultdict(float)
+		return
+	def get(self,inputfile,limit):
+		count = 0
+		try:
+			with open(inputfile, 'rt') as file:
+				for line in file:
+					if (limit != -1):
+						if (count > limit):
+							file.close()
+							return
+					count += 1
+					transaction = line.split()
+					for t in transaction:
+						self.item[" "+t].append(count)
+						self.total += 1
+			file.close()
+			return
 
-def getTransaction(inputfile):
-    transaction_set = []
+		except RuntimeError:
+			print "myApriori: Something wrong when reading file"
+			return
 
-    # Check if file exist
-    if not os.path.isfile(inputfile):
-        print "File not found"
-        return []
+	def apriori(self,minsupport):
+		k = 1 
+		self.f.append(([]))
+		self.f.append(([]))
+		for key,value in self.item.iteritems():
+			if ((len(value)/self.total) >= minsupport):
+				self.f[k].append(key)
+				self.f_sup[key] = (len(value)/self.total) 
+		self.f[k] = sorted(self.f[k])
+		k = 2
+		self.f.append(([]))
+		while (len(self.f[k-1]) != 0):
+			spawner = candidateGen()
+			spawner.push(self.f[k-1],k-1)
 
-    try:
-        with open(inputfile, 'rt') as file:
-            for line in file:
-                transaction = line.split()
+			candidate = spawner.gen()
 
-                # Convert string to int
-                item_set = []
-                for item in transaction:
-                    item_set.append(int(item))
-                transaction_set.append(item_set)
-        return transaction_set
+			for item in candidate:
+				#intersection
+				l = []
+				for i in item:
+					l.append(self.item[i])
+				count = len(set(l[0]).intersection(*l))
 
-    except:
-        print "Something wrong when reading file"
-        return []
+				if (count/self.total >= minsupport):
+					self.f[k].append(item)
+					self.f_sup[''.join(item)] = (count/self.total)
 
-def Apriori(transaction_set, minsupport):
-    init_set = Counter()
-    transaction_len = len(transaction_set)
+			k += 1
+			self.f.append(([]))
 
-    # create init itemsets
-    for transaction in transaction_set:
-        for item in transaction:
-            init_set[(item)] += 1
-
-    # Find first frequent set
-    first_set = {item: frequency for (item, frequency) in init_set.iteritems()
-               if float(init_set[item]) / transaction_len >= minsupport}
-    freqset = []
-    freqset.append(first_set)
-
-    # Convert list to list of list for matching right parameter
-    first_freq = [[item] for item in freqset[-1]]
-    current_candidate = candidateGen(first_freq)
-
-    while 1:
-        #current_candidate = candidateGen(freqset[-1].keys())#candidateGen([[x] for x in freqset[-1].keys()])
-        #pdb.set_trace()
-        candidate_dict = Counter()
-
-        for transaction in transaction_set:
-            for candidate_item in current_candidate:
-                # Find item in transaction
-                matches = [item for item in candidate_item if item in transaction]
-                if len(matches) == len(candidate_item):
-                    candidate_dict[tuple(candidate_item)] += 1
-
-        new_freqset = {item: freq for item, freq in candidate_dict.iteritems()
-                        if float(freq)/transaction_len >= minsupport}
-
-        # Remove candidate_dict because new_freqset will iterate through the old items
-        del candidate_dict
-
-        # Still have something to generate else break the loop
-        if new_freqset:
-            freqset.append(new_freqset)
-
-            # Find new candidate
-            current_candidate = candidateGen([list(item_set) for item_set in freqset[-1].keys()])
-            if current_candidate == []:
-                break
-        else:
-            break
-
-    return freqset, transaction_len
-
-def writeFreqSet(freqsets, transaction_len, outputfile):
-    try:
-        with open(outputfile, "wt") as file:
-            for freqset in freqsets:
-                for itemset, value in freqset.iteritems():
-                    support = float(value) / transaction_len
-                    support = round(support, 2)
-                    file.write(str(support) + ' ')
-
-                    if type(itemset) == int:
-                        file.write(str(itemset) + ' ')
-                    else:
-                        for item in itemset:
-                            file.write(str(item) + ' ')
-                    file.write('\n')
-
-    except:
-        print "Something wrong when reading file"
-        return
-
-
-def userInput():
-    inputfile = sys.argv[1]
-    outputfile = sys.argv[2]
-    minsup = sys.argv[3]
-
-    # Get transaction
-    transaction = getTransaction(inputfile)
-    if not transaction:
-        return
-
-    # Find frequency set with minsup
-    freqset, transaction_len = Apriori(transaction, float(minsup))
-
-    # Write result to file
-    writeFreqSet(freqset, transaction_len, outputfile)
-
+		return self.f
+	def write(self,outputfile):
+		# Write output
+		try:
+			with open(outputfile, "wt") as file:
+				for i in self.f:
+					for j in i:
+						line = ''.join(j)
+						file.write(str(self.f_sup[line]))
+						file.write(line)
+						file.write("\n")
+			file.close()
+		except ValueError:
+			print "Cannot write file"
+			return
 if __name__ == "__main__":
-    userInput()
+	rule = myApriori()
+	rule.get(sys.argv[1],-1)
+	rule.apriori(float(sys.argv[3]))
+	rule.write(sys.argv[2])

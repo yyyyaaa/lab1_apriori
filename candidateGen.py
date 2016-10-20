@@ -2,79 +2,103 @@ import sys
 import os
 import itertools
 from collections import defaultdict
-import pdb
 
-def candidateGen(freqset):
-    '''
-    params:
-        *freqset: list of list
-    '''
+class candidateGen():
+	def __init__(self):
+		#transactions:
+		#	a b c
+		#	a b e
+		#	a b c d
+		#data:
+		#	data["a b"] = [" c"]
+		#	data["a b"] = [" c"," e"]
+		#	data["a b c"] = [" d"]
+		#level:
+		#	level[3] = [["a","b","c"],["a","b","e"]]
+		#	level[4] = [["a","b","c","d"]]
+		self.data = defaultdict(list)
+		#self.level = defaultdict(list)
+		self.candidate = []
+	def get(self,inputfile,limit):
+		count = 0
+		try:
 
-    # Set of new candidate
-    candidate_set = []
+			with open(inputfile, "rt") as file:
+				for line in file:
+					if (limit != -1):
+						if (count > limit):
+							file.close()
+							return
+					count +=1
 
-    if not freqset:
-        return []
+					temp = line.strip().rsplit(' ', 1)
+					if len(temp) == 1:
+						if (" "+temp[0]) not in self.data[" "]:
+							self.data[" "].append(" "+temp[0])
+						continue
+					key,value = temp
+					value = " "+value
+					key = " "+key
+					if (value not in self.data[key]):
+						self.data[key].append(value)
+						list_item = line.split()
+			file.close()
+			return
+		except RuntimeError:
+			print count
+			print line
+			print "Something wrong when reading file"
+			return
+	def push(self,transactions,k):
+		if k == 1:
+			self.data[' '] += transactions
+			return
+		for t in transactions:
+			self.data[''.join(t[0:-1])].append(t[-1])
+	def gen(self):
+		for key,value in self.data.iteritems():
+			if (len(value) >= 2):
+				for t1,t2 in itertools.combinations(sorted(value),2):
+					new_set = (key + t1 + t2).split()
+					flag = True
+					if (len(new_set) == 2):
+						self.candidate.append([' {}'.format(x) for x in new_set])
+						continue
+					
+					for list_new_item in itertools.combinations(new_set,len(new_set)-1):
+						k = " " + (' '.join(list_new_item[0:-1]))
 
-    if len(freqset) == 1:
-        return []
-
-    # Join step
-    for i in range(len(freqset) - 1):
-        for j in range(i+1, len(freqset)):
-            if cmp(freqset[i][:-1], freqset[j][:-1]) == 0 and freqset[i][-1] != freqset[j][-1]:
-                newset = freqset[i] + [freqset[j][-1]]
-                candidate_set.append(newset)
-
-                # Prune step
-                item_combination = [list(x) for x in itertools.combinations(newset,len(newset) - 1)]
-                for item in item_combination:
-                    if item not in freqset:
-                        candidate_set.remove(newset)
-                        break
-    return candidate_set
-
-def getFreqSet(inputfile):
-    freqset = []
-    try:
-        with open(inputfile, "rt") as file:
-            for line in file:
-                transaction = line.split()
-                freqset.append(transaction)
-
-        file.close()
-        return freqset
-
-    except:
-        print "Something wrong when reading file"
-        return []
-
-
-def writeCandidate():
-    inputfile = sys.argv[1]
-    outputfile = sys.argv[2]
-
-    # Check input file
-    if not os.path.isfile(inputfile):
-        print "Input file not found"
-        return
-
-    # Get frequent itemsets from inputfile
-    freqset = getFreqSet(inputfile)
-
-    # Generate candidate
-    candidate_set = candidateGen(freqset)
-
-    # Write output
-    try:
-        with open(outputfile, "wt") as file:
-            for key in candidate_set:
-                line = ' '.join(key)
-                file.write(line + '\n')
-        file.close()
-    except:
-        print "Cannot write file"
-        return
+						if k in self.data:
+							if ((" " + list_new_item[-1]) not in self.data[k]):
+								flag = False
+								break
+						else:
+							flag = False
+							break
+					if (flag):
+						self.candidate.append([' {}'.format(x) for x in new_set])
+		self.candidate = sorted(self.candidate)
+		return self.candidate
+	def write(self,outputfile):
+		
+		# Write output
+		try:
+			with open(outputfile, "wt") as file:
+				for c in self.candidate:
+					line = ''.join(c).strip()
+					file.write(line)
+					file.write("\n")
+			file.close()
+		except:
+			print "Cannot write file"
+			return
+			
 
 if __name__ == "__main__":
-    writeCandidate()
+	spawner = candidateGen()
+	#-1 all
+	spawner.get(sys.argv[1],-1)
+	spawner.gen()
+	spawner.write(sys.argv[2])
+
+
