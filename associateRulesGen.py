@@ -53,8 +53,8 @@ class associateRulesGen():
 
 			self.apgen(f,k,h,m,minconf)
 		
-		for rule in self.rule:
-			print rule
+		#for rule in self.rule:
+		#	print rule
 
 	def write(self,outputfile):
 		# Write output
@@ -71,5 +71,7 @@ class associateRulesGen():
 if __name__ == "__main__":
 	rulegen = associateRulesGen()
 	rulegen.get("output1.dat")
-	rulegen.gen(0.5,4)
+	k = 3
+	if (k>1):
+		rulegen.gen(0.6,k)
 	rulegen.write("output2.dat")

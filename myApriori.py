@@ -22,7 +22,7 @@ class myApriori():
 					transaction = line.split()
 					for t in transaction:
 						self.item[" "+t].append(count)
-						self.total += 1
+					self.total += 1
 			file.close()
 			return
 
@@ -39,6 +39,7 @@ class myApriori():
 				self.f[k].append(key)
 				self.f_sup[key] = (len(value)/self.total) 
 		self.f[k] = sorted(self.f[k])
+
 		k = 2
 		self.f.append(([]))
 		while (len(self.f[k-1]) != 0):
@@ -60,7 +61,6 @@ class myApriori():
 
 			k += 1
 			self.f.append(([]))
-
 		return self.f
 	def write(self,outputfile):
 		# Write output
@@ -78,6 +78,11 @@ class myApriori():
 			return
 if __name__ == "__main__":
 	rule = myApriori()
+	rule.get("retail1.dat",-1)
+	rule.apriori(0.4)
+	rule.write("output1.dat")
+	"""
 	rule.get(sys.argv[1],-1)
 	rule.apriori(float(sys.argv[3]))
 	rule.write(sys.argv[2])
+	"""

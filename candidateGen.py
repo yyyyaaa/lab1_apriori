@@ -13,11 +13,8 @@ class candidateGen():
 		#	data["a b"] = [" c"]
 		#	data["a b"] = [" c"," e"]
 		#	data["a b c"] = [" d"]
-		#level:
-		#	level[3] = [["a","b","c"],["a","b","e"]]
-		#	level[4] = [["a","b","c","d"]]
+
 		self.data = defaultdict(list)
-		#self.level = defaultdict(list)
 		self.candidate = []
 	def get(self,inputfile,limit):
 		count = 0
@@ -97,8 +94,11 @@ class candidateGen():
 if __name__ == "__main__":
 	spawner = candidateGen()
 	#-1 all
-	spawner.get(sys.argv[1],-1)
+	#spawner.get(sys.argv[1],-1)
+	#spawner.gen()
+	#spawner.write(sys.argv[2])
+	spawner.get("retail1.dat",-1)
 	spawner.gen()
-	spawner.write(sys.argv[2])
+	spawner.write("output.dat")
 
 
