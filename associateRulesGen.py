@@ -6,6 +6,7 @@ class associateRulesGen():
 		self.sup = defaultdict(float)
 		self.f = defaultdict(list)
 		self.rule = []
+		self.conf_rule = []
 		return
 	def get(self,inputfile):
 		try:
@@ -32,6 +33,7 @@ class associateRulesGen():
 					rule = [[x for x in f if x not in t],t]
 					if (self.sup[" ".join(f)]/self.sup[" ".join(rule[0])] >= minconf):
 						self.rule.append(rule)
+						self.conf_rule.append(self.sup[" ".join(f)]/self.sup[" ".join(rule[0])])
 						h[m+1].append(rule[1])
 			self.apgen(f,k,h,m+1,minconf)
 
@@ -49,6 +51,7 @@ class associateRulesGen():
 					continue
 				if (self.sup[" ".join(f)]/self.sup[" ".join(rule[0])] >= minconf):
 					self.rule.append(rule)
+					self.conf_rule.append(self.sup[" ".join(f)]/self.sup[" ".join(rule[0])])
 					h[m].append(rule[1])
 
 			self.apgen(f,k,h,m,minconf)
@@ -58,12 +61,14 @@ class associateRulesGen():
 
 	def write(self,outputfile):
 		# Write output
+		count = 0
 		try:
 			with open(outputfile, "wt") as file:
 				for rule in self.rule:
-					line = ' '.join(rule[0]) + " -> " + ' '.join(rule[1])
+					line = "{0:.2f} ".format(self.conf_rule[count]) +' '.join(rule[0]) + " -> " + ' '.join(rule[1])
 					file.write(line)
 					file.write("\n")
+					count += 1
 			file.close()
 		except:
 			print "Cannot write file"

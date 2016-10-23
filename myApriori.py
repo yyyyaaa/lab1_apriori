@@ -69,7 +69,7 @@ class myApriori():
 				for i in self.f:
 					for j in i:
 						line = ''.join(j)
-						file.write(str(self.f_sup[line]))
+						file.write("{0:.2f}".format(self.f_sup[line]))
 						file.write(line)
 						file.write("\n")
 			file.close()
