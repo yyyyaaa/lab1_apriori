@@ -77,12 +77,15 @@ class myApriori():
 			print "Cannot write file"
 			return
 if __name__ == "__main__":
+	"""
 	rule = myApriori()
-	rule.get("retail1.dat",-1)
-	rule.apriori(0.4)
+	rule.get("retail.dat",-1)
+	rule.apriori(0.01)
 	rule.write("output1.dat")
 	"""
+	rule = myApriori()
 	rule.get(sys.argv[1],-1)
-	rule.apriori(float(sys.argv[3]))
+	minsup = float(sys.argv[3])
+	rule.apriori(minsup)
 	rule.write(sys.argv[2])
-	"""
+	

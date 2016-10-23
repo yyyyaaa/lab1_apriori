@@ -61,7 +61,7 @@ class associateRulesGen():
 		try:
 			with open(outputfile, "wt") as file:
 				for rule in self.rule:
-					line = ' '.join(rule[0]) + " --> " + ' '.join(rule[1])
+					line = ' '.join(rule[0]) + " -> " + ' '.join(rule[1])
 					file.write(line)
 					file.write("\n")
 			file.close()
@@ -69,9 +69,25 @@ class associateRulesGen():
 			print "Cannot write file"
 			return
 if __name__ == "__main__":
+	"""
 	rulegen = associateRulesGen()
 	rulegen.get("output1.dat")
-	k = 3
+	k = 1
 	if (k>1):
-		rulegen.gen(0.6,k)
+		rulegen.gen(0.4,k)
+	else:
+		for key in rulegen.f.keys():
+			print key
+			rulegen.gen(0.1,key)
 	rulegen.write("output2.dat")
+	"""
+	rulegen = associateRulesGen()
+	rulegen.get(sys.argv[1])
+	k = int(sys.argv[4])
+	minconf = float(sys.argv[3])
+	if (k>1):
+		rulegen.gen(minconf,k)
+	else:
+		for key in rulegen.f.keys():
+			rulegen.gen(minconf,key)
+	rulegen.write(sys.argv[2])

@@ -10,9 +10,9 @@ class candidateGen():
 		#	a b e
 		#	a b c d
 		#data:
-		#	data["a b"] = [" c"]
-		#	data["a b"] = [" c"," e"]
-		#	data["a b c"] = [" d"]
+		#	data[" a b"] = [" c"]
+		#	data[" a b"] = [" c"," e"]
+		#	data[" a b c"] = [" d"]
 
 		self.data = defaultdict(list)
 		self.candidate = []
@@ -27,15 +27,15 @@ class candidateGen():
 							file.close()
 							return
 					count +=1
-
-					temp = line.strip().rsplit(' ', 1)
+					temp = " ".join(sorted(line.split()))
+					temp = temp.strip().rsplit(' ', 1)
 					if len(temp) == 1:
 						if (" "+temp[0]) not in self.data[" "]:
 							self.data[" "].append(" "+temp[0])
 						continue
 					key,value = temp
 					value = " "+value
-					key = " "+key
+					key = " " + key
 					if (value not in self.data[key]):
 						self.data[key].append(value)
 						list_item = line.split()
@@ -92,13 +92,15 @@ class candidateGen():
 			
 
 if __name__ == "__main__":
+	"""
 	spawner = candidateGen()
-	#-1 all
-	#spawner.get(sys.argv[1],-1)
-	#spawner.gen()
-	#spawner.write(sys.argv[2])
 	spawner.get("retail1.dat",-1)
 	spawner.gen()
 	spawner.write("output.dat")
-
+	"""
+	#-1 all
+	spawner = candidateGen()
+	spawner.get(sys.argv[1],-1)
+	spawner.gen()
+	spawner.write(sys.argv[2])
 
